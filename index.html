@@ -1,0 +1,133 @@
+<html lang="ja">
+<head>
+    <title>画像のドット抜けを自然に取り除けるかもしれないサイト | Gifted Style</title>
+    <meta name="description" content="画像のドット抜けを自然に取り除けるかもしれないサイトです。"/>
+    <style>
+.progress {
+  border-radius: 30px;
+  height: 40px;
+  background: #ddd;
+  overflow: hidden;
+}
+.bar {
+  background: #FFC100;
+  border-radius: inherit;
+  height: 100%;
+  width: 0%;
+  transition: 2s;
+}
+    </style>
+</head>
+<body>
+<img src="" id="preview">
+<canvas id="canvas"></canvas></br>
+<input type="file" accept="image/*" id="getfile"></br>
+<div class="progress">
+  <div class="bar" id="Bar"></div>
+</div></br></br>
+このサイトは画像のドット抜けを</br>
+取り除けるかもしれないサイトです。</br></br>
+
+全てのピクセルに対して</br>
+左右が同じ位の色で自身のみ大幅に異なる場合に</br>
+自身を左右の平均の色に修正します。</br></br>
+
+例えば左右のピクセルが赤で</br>
+自身が青ならば異常と判定して</br>
+自身を赤にします。</br></br>
+
+この作業は上下も行います。</br></br>
+
+画像の内容はほとんど変わらないため</br>
+大きなノイズを削除する効果はありません。
+<script>
+
+function MyThread(i, ctx, canvas) {
+for(let j = 0; j < canvas.height; j++) {
+  {
+    if(i - 1 < 0 || canvas.width <= i + 1) continue;
+    const imageData = ctx.getImageData(i, j, 1, 1);
+    let r1 = imageData.data[0];
+    let g1 = imageData.data[1];
+    let b1 = imageData.data[2];
+    let a = imageData.data[3];
+    const imageData2 = ctx.getImageData(i - 1, j, 1, 1);
+    let r2 = imageData2.data[0];
+    let g2 = imageData2.data[1];
+    let b2 = imageData2.data[2];
+    const imageData3 = ctx.getImageData(i + 1, j, 1, 1);
+    let r3 = imageData3.data[0];
+    let g3 = imageData3.data[1];
+    let b3 = imageData3.data[2];
+    
+    let targetPoint1 = Math.abs(r3 - r2) + Math.abs(g3 - g2) + Math.abs(b3 - b2);
+    let targetPoint2 = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+    if(Math.abs(r3 - r2) < 3 && Math.abs(g3 - g2) < 3 && Math.abs(b3 - b2) < 3 && 16 < targetPoint2) {
+      ctx.fillStyle = "rgba(" + (r2 + r3) / 2 + "," + (g2 + g3) / 2 + "," + (b2 + b3) / 2 + "," + a / 255 + ")";
+      ctx.fillRect(i, j, 1, 1);
+    }
+  }
+  {
+    if(j - 1 < 0 || canvas.height <= j + 1) continue;
+    const imageData = ctx.getImageData(i, j, 1, 1);
+    let r1 = imageData.data[0];
+    let g1 = imageData.data[1];
+    let b1 = imageData.data[2];
+    let a = imageData.data[3];
+    const imageData2 = ctx.getImageData(i, j - 1, 1, 1);
+    let r2 = imageData2.data[0];
+    let g2 = imageData2.data[1];
+    let b2 = imageData2.data[2];
+    const imageData3 = ctx.getImageData(i, j + 1, 1, 1);
+    let r3 = imageData3.data[0];
+    let g3 = imageData3.data[1];
+    let b3 = imageData3.data[2];
+    
+    let targetPoint1 = Math.abs(r3 - r2) + Math.abs(g3 - g2) + Math.abs(b3 - b2);
+    let targetPoint2 = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+    if(targetPoint1 < 6 && 15 < targetPoint2) {
+      ctx.fillStyle = "rgba(" + (r2 + r3) / 2 + "," + (g2 + g3) / 2 + "," + (b2 + b3) / 2 + "," + a / 255 + ")";
+      ctx.fillRect(i, j, 1, 1);
+    }
+  }
+}
+
+        const diff = canvas.width - i;
+    	const widthPercentage = (i / canvas.width) * 100;
+    	document.getElementById('Bar').style.width = widthPercentage + '%';
+}
+
+var file = document.querySelector('#getfile');
+
+file.onchange = function (){
+  var fileList = file.files;
+  //読み込み
+  var reader = new FileReader();
+  reader.readAsDataURL(fileList[0]); 
+
+  //読み込み後
+  reader.onload = function  () {
+    document.querySelector('#preview').src = reader.result;
+
+    const image = document.getElementById('preview');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+image.onload = function() {
+    canvas.width = image.width;
+    canvas.height = image.height;
+    ctx.drawImage(image, 0, 0);
+setTimeout(() => {
+  for(let i = 0; i < canvas.width; i++) {
+    setTimeout(() => {
+      MyThread(i, ctx, canvas);
+    }, 0);
+  }
+}, 0);
+};
+};
+};
+
+
+</script> 
+</body>
+</html>
