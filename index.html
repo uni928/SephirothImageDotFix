@@ -89,7 +89,7 @@ for(let j = 0; j < canvas.height; j++) {
     
     let targetPoint1 = Math.abs(r3 - r2) + Math.abs(g3 - g2) + Math.abs(b3 - b2);
     let targetPoint2 = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
-    if(targetPoint1 < 6 && 15 < targetPoint2) {
+    if(Math.abs(r3 - r2) < 3 && Math.abs(g3 - g2) < 3 && Math.abs(b3 - b2) < 3 && 15 < targetPoint2) {
       ctx.fillStyle = "rgba(" + (r2 + r3) / 2 + "," + (g2 + g3) / 2 + "," + (b2 + b3) / 2 + "," + a / 255 + ")";
       ctx.fillRect(i, j, 1, 1);
     }
